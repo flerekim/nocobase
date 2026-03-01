@@ -11,7 +11,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { connect, mapProps, mapReadPretty } from '@formily/react';
 import { Input as AntdInput } from 'antd';
 import { InputProps, TextAreaProps } from 'antd/es/input';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { JSONTextAreaProps, Json } from './Json';
 import { InputReadPrettyComposed, ReadPretty } from './ReadPretty';
 import { ScanInput } from './ScanInput';
@@ -32,9 +32,11 @@ export type NocoBaseInputProps = InputProps & {
 
 function InputInner(props: NocoBaseInputProps) {
   const { onChange, trim, enableScan, ...others } = props;
+  const composingRef = useRef(false);
 
   const handleChange = useCallback(
     (ev: React.ChangeEvent<HTMLInputElement>) => {
+      if (composingRef.current) return;
       if (trim) {
         ev.target.value = ev.target.value.trim();
       }
@@ -42,13 +44,78 @@ function InputInner(props: NocoBaseInputProps) {
     },
     [onChange, trim],
   );
+
+  const handleCompositionStart = useCallback(() => {
+    composingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback(
+    (ev: React.CompositionEvent<HTMLInputElement>) => {
+      composingRef.current = false;
+      const changeEv = ev as unknown as React.ChangeEvent<HTMLInputElement>;
+      if (trim) {
+        changeEv.target.value = changeEv.target.value.trim();
+      }
+      onChange?.(changeEv);
+    },
+    [onChange, trim],
+  );
+
   if (enableScan) {
-    return <ScanInput {...others} onChange={handleChange} />;
+    return (
+      <ScanInput
+        {...others}
+        onChange={handleChange}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+      />
+    );
   }
-  return <AntdInput {...others} onChange={handleChange} />;
+  return (
+    <AntdInput
+      {...others}
+      onChange={handleChange}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
+    />
+  );
 }
 
 InputInner.Password = AntdInput.Password;
+
+function TextAreaInner(props: TextAreaProps) {
+  const { onChange, ...others } = props;
+  const composingRef = useRef(false);
+
+  const handleChange = useCallback(
+    (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
+      if (composingRef.current) return;
+      onChange?.(ev);
+    },
+    [onChange],
+  );
+
+  const handleCompositionStart = useCallback(() => {
+    composingRef.current = true;
+  }, []);
+
+  const handleCompositionEnd = useCallback(
+    (ev: React.CompositionEvent<HTMLTextAreaElement>) => {
+      composingRef.current = false;
+      onChange?.(ev as unknown as React.ChangeEvent<HTMLTextAreaElement>);
+    },
+    [onChange],
+  );
+
+  return (
+    <AntdInput.TextArea
+      {...others}
+      onChange={handleChange}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
+    />
+  );
+}
 
 export const Input: ComposedInput = Object.assign(
   connect(
@@ -63,7 +130,7 @@ export const Input: ComposedInput = Object.assign(
   ),
   {
     TextArea: connect(
-      AntdInput.TextArea,
+      TextAreaInner,
       mapProps((props, field) => {
         return {
           autoSize: {
