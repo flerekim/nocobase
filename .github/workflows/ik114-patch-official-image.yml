@@ -6,11 +6,11 @@ on:
       base_image:
         description: 'Official NocoBase image digest to patch'
         required: true
-        default: 'nocobase/nocobase@sha256:328589b7412c4eb2c6a1c7d2bd852b2eccad7d20fb0689861260a866c73bdeb3'
+        default: 'nocobase/nocobase@sha256:a0498318ca5d4b1f7577522b7fea59fbdbcb4a08d4b5901322305406f90501ab'
       image_tag:
         description: 'GHCR image tag to publish'
         required: true
-        default: '2.1.0-beta.37-ik114-officialbase.1'
+        default: '2.1.0-beta.37-ik114-officialbase.2'
       platforms:
         description: 'Build platforms'
         required: true
@@ -39,56 +39,93 @@ jobs:
 
           RUN node <<'NODE'
           const fs = require('fs');
+          const path = require('path');
+
+          function walk(dir, out = []) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(full, out);
+              else if (entry.isFile() && full.endsWith('.js')) out.push(full);
+            }
+            return out;
+          }
+
+          const root = '/app/nocobase/node_modules/@nocobase/app/dist/client';
+          const files = walk(root);
           const patches = [
             {
-              file: '/app/nocobase/node_modules/@nocobase/app/dist/client/v2/assets/index-d358751d.js',
+              name: 'v2 FieldModelRenderer',
               from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),r=l=>{let r;if(r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r}),!n.current){var o;null==(o=e.onChange)||o.call(e,r)}},o={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...A().omit(l,tV),onChange:r};',
               to: 'function tz(e){let{model:t,...l}=e,r=l=>{let r;r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r});var o;null==(o=e.onChange)||o.call(e,r)},o={...A().omit(l,tV),onChange:r};',
             },
             {
-              file: '/app/nocobase/node_modules/@nocobase/app/dist/client/assets/index-7bb4b4a6.js',
+              name: 'legacy FieldModelRenderer',
               from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),o=l=>{let o;if(o=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:o}),!n.current){var r;null==(r=e.onChange)||r.call(e,o)}},r={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...k().omit(l,tV),onChange:o};',
               to: 'function tz(e){let{model:t,...l}=e,o=l=>{let o;o=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:o});var r;null==(r=e.onChange)||r.call(e,o)},r={...k().omit(l,tV),onChange:o};',
             },
           ];
+
+          const patchedFiles = [];
           for (const patch of patches) {
-            let source = fs.readFileSync(patch.file, 'utf8');
-            const count = source.split(patch.from).length - 1;
-            if (count !== 1) {
-              throw new Error(`${patch.file}: expected one match, found ${count}`);
+            const matches = [];
+            for (const file of files) {
+              const source = fs.readFileSync(file, 'utf8');
+              const count = source.split(patch.from).length - 1;
+              if (count > 0) matches.push({ file, count });
             }
-            source = source.replace(patch.from, patch.to);
-            fs.writeFileSync(patch.file, source);
+            const total = matches.reduce((sum, item) => sum + item.count, 0);
+            if (total !== 1 || matches.length !== 1) {
+              throw new Error(`${patch.name}: expected exactly one match, got ${total} in ${JSON.stringify(matches)}`);
+            }
+            const match = matches[0];
+            const source = fs.readFileSync(match.file, 'utf8').replace(patch.from, patch.to);
+            fs.writeFileSync(match.file, source);
+            patchedFiles.push(match.file);
           }
+
           fs.writeFileSync('/app/ik114_patch_info.txt', [
             'ik114 Korean/CJK IME patch',
             `base=${process.env.IK114_BASE_IMAGE || 'unknown'}`,
             'source-pr=https://github.com/nocobase/nocobase/pull/9194',
+            ...patchedFiles.map((file) => `patched=${file}`),
           ].join('\n') + '\n');
           NODE
 
           RUN node <<'NODE'
           const fs = require('fs');
-          const checks = [
-            {
-              file: '/app/nocobase/node_modules/@nocobase/app/dist/client/v2/assets/index-d358751d.js',
-              mustHave: 'function tz(e){let{model:t,...l}=e,r=l=>{let r;r=l&&l.target&&void 0!==l.target.value?',
-              mustNotHave: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1)',
-            },
-            {
-              file: '/app/nocobase/node_modules/@nocobase/app/dist/client/assets/index-7bb4b4a6.js',
-              mustHave: 'function tz(e){let{model:t,...l}=e,o=l=>{let o;o=l&&l.target&&void 0!==l.target.value?',
-              mustNotHave: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1)',
-            },
-          ];
-          for (const check of checks) {
-            const source = fs.readFileSync(check.file, 'utf8');
-            if (!source.includes(check.mustHave)) throw new Error(`${check.file}: patched marker missing`);
-            if (source.includes(check.mustNotHave)) throw new Error(`${check.file}: old composing guard still present`);
+          const path = require('path');
+
+          function walk(dir, out = []) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) walk(full, out);
+              else if (entry.isFile() && full.endsWith('.js')) out.push(full);
+            }
+            return out;
+          }
+
+          const root = '/app/nocobase/node_modules/@nocobase/app/dist/client';
+          const joined = walk(root).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+          if (joined.includes('function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1)')) {
+            throw new Error('old composing guard still present');
+          }
+          if (!joined.includes('function tz(e){let{model:t,...l}=e,r=l=>{let r;r=l&&l.target&&void 0!==l.target.value?')) {
+            throw new Error('patched v2 marker missing');
+          }
+          if (!joined.includes('function tz(e){let{model:t,...l}=e,o=l=>{let o;o=l&&l.target&&void 0!==l.target.value?')) {
+            throw new Error('patched legacy marker missing');
           }
           for (const plugin of ['@nocobase/plugin-idp-oauth', '@nocobase/plugin-mcp-server']) {
             const pkg = `/app/nocobase/node_modules/${plugin}/package.json`;
             if (!fs.existsSync(pkg)) throw new Error(`${plugin} package missing`);
+          }
+          for (const pkgPath of [
+            '/app/nocobase/node_modules/@nocobase/server/package.json',
+            '/app/nocobase/node_modules/@nocobase/app/package.json',
+            '/app/nocobase/node_modules/@nocobase/plugin-client/package.json',
+          ]) {
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            console.log(`${pkgPath} ${pkg.version}`);
           }
           NODE
           DOCKERFILE
