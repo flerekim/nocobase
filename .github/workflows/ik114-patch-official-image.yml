@@ -34,6 +34,8 @@ jobs:
           cat > Dockerfile.ik114-ime-officialbase <<'DOCKERFILE'
           ARG BASE_IMAGE
           FROM ${BASE_IMAGE}
+          ARG BASE_IMAGE
+          ENV IK114_BASE_IMAGE=${BASE_IMAGE}
 
           RUN node <<'NODE'
           const fs = require('fs');
@@ -60,7 +62,7 @@ jobs:
           }
           fs.writeFileSync('/app/ik114_patch_info.txt', [
             'ik114 Korean/CJK IME patch',
-            `base=${process.env.BASE_IMAGE || 'unknown'}`,
+            `base=${process.env.IK114_BASE_IMAGE || 'unknown'}`,
             'source-pr=https://github.com/nocobase/nocobase/pull/9194',
           ].join('\n') + '\n');
           NODE
