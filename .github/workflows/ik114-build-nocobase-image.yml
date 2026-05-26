@@ -27,11 +27,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      verdaccio:
-        image: verdaccio/verdaccio
-        ports:
-          - 4873:4873
 
     steps:
       - name: Checkout custom source
@@ -39,6 +34,48 @@ jobs:
         with:
           ref: ${{ inputs.source_ref }}
           fetch-depth: 0
+
+      - name: Start Verdaccio package registry
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/verdaccio/conf" "$RUNNER_TEMP/verdaccio/storage" "$RUNNER_TEMP/verdaccio/plugins"
+          cat > "$RUNNER_TEMP/verdaccio/conf/config.yaml" <<'VERDACCIO'
+          storage: /verdaccio/storage
+          plugins: /verdaccio/plugins
+          auth:
+            htpasswd:
+              file: /verdaccio/conf/htpasswd
+          uplinks:
+            npmjs:
+              url: https://registry.npmjs.org/
+          packages:
+            '@*/*':
+              access: $all
+              publish: $authenticated
+              proxy: npmjs
+            '**':
+              access: $all
+              publish: $authenticated
+              proxy: npmjs
+          max_body_size: 500mb
+          logs:
+            - {type: stdout, format: pretty, level: http}
+          VERDACCIO
+          sed -i 's/^          //' "$RUNNER_TEMP/verdaccio/conf/config.yaml"
+          sudo chown -R 10001:65533 "$RUNNER_TEMP/verdaccio"
+          docker run -d --name ik114-verdaccio -p 4873:4873 \
+            -v "$RUNNER_TEMP/verdaccio/conf:/verdaccio/conf" \
+            -v "$RUNNER_TEMP/verdaccio/storage:/verdaccio/storage" \
+            -v "$RUNNER_TEMP/verdaccio/plugins:/verdaccio/plugins" \
+            verdaccio/verdaccio
+          for i in {1..30}; do
+            if curl -fsS http://localhost:4873/-/ping; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs ik114-verdaccio
+          exit 1
 
       - name: Verify IK114 IME patch is present
         run: |
@@ -157,3 +194,7 @@ jobs:
           platforms: ${{ inputs.platforms }}
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/nocobase:${{ inputs.image_tag }}
+
+      - name: Dump Verdaccio logs
+        if: always()
+        run: docker logs ik114-verdaccio || true
