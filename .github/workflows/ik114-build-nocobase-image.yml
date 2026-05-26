@@ -64,7 +64,7 @@ jobs:
           ARG BEFORE_PACK_NOCOBASE="ls -l"
           ARG PLUGINS_DIRS
           ENV PLUGINS_DIRS=${PLUGINS_DIRS}
-          RUN npx npm-cli-adduser --username test --password test -e test@nocobase.com -r $VERDACCIO_URL
+          RUN printf "test\ntest\ntest@nocobase.com\n" | npm adduser --registry $VERDACCIO_URL --auth-type=legacy
           RUN apt-get update && apt-get install -y jq git
           WORKDIR /tmp
           COPY . /tmp
