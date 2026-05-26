@@ -143,9 +143,10 @@ jobs:
           RUN cd /tmp && NEWVERSION="$(cat lerna.json | jq '.version' | tr -d '"').$(date +'%Y%m%d%H%M%S')" && git checkout -b release-$(date +'%Y%m%d%H%M%S') && yarn lerna version ${NEWVERSION} -y --no-git-tag-version
           RUN git config user.email "test@mail.com" && git config user.name "test" && git add . && git commit -m "chore(versions): test publish packages"
           RUN yarn release:force --registry $VERDACCIO_URL
-          RUN yarn config set registry $VERDACCIO_URL
+          RUN yarn global add create-nocobase-app --registry $VERDACCIO_URL
+          RUN printf "registry=https://registry.npmjs.org/\n@nocobase:registry=${VERDACCIO_URL}\n" > /root/.npmrc && yarn config set registry https://registry.npmjs.org/
           WORKDIR /app
-          RUN cd /app && yarn config set network-timeout 600000 -g && yarn create nocobase-app my-nocobase-app -a -e APP_ENV=production -e APPEND_PRESET_LOCAL_PLUGINS=$APPEND_PRESET_LOCAL_PLUGINS && cd /app/my-nocobase-app && yarn install --production
+          RUN cd /app && yarn config set network-timeout 600000 -g && create-nocobase-app my-nocobase-app -a -e APP_ENV=production -e APPEND_PRESET_LOCAL_PLUGINS=$APPEND_PRESET_LOCAL_PLUGINS && cd /app/my-nocobase-app && printf "registry=https://registry.npmjs.org/\n@nocobase:registry=${VERDACCIO_URL}\n" > .npmrc && yarn install --production
           WORKDIR /app/my-nocobase-app
           RUN $BEFORE_PACK_NOCOBASE
           RUN cd /app && rm -rf my-nocobase-app/packages/app/client/src/.umi && rm -rf nocobase.tar.gz && tar -zcf ./nocobase.tar.gz -C /app/my-nocobase-app .
