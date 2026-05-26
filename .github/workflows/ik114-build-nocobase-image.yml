@@ -57,7 +57,7 @@ jobs:
       - name: Create full source-build Dockerfile
         run: |
           cat > Dockerfile.ik114-full-source <<'DOCKERFILE'
-          FROM node:20.13-bullseye as builder
+          FROM node:20-bookworm as builder
           ARG VERDACCIO_URL=http://host.docker.internal:10104/
           ARG COMMIT_HASH
           ARG APPEND_PRESET_LOCAL_PLUGINS
