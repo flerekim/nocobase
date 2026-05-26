@@ -10,7 +10,7 @@ on:
       image_tag:
         description: 'GHCR image tag to publish'
         required: true
-        default: '2.1.0-beta.37-ik114.1'
+        default: '2.1.0-beta.37-ik114.2'
       platforms:
         description: 'Build platforms'
         required: true
@@ -159,6 +159,7 @@ jobs:
           RUN rm -rf /etc/nginx/sites-enabled/default
           COPY --from=builder /app/nocobase.tar.gz /app/nocobase.tar.gz
           COPY --from=builder /tmp/commit_hash.txt /app/commit_hash.txt
+          RUN mkdir -p /app/nocobase && tar -zxf /app/nocobase.tar.gz -C /app/nocobase && rm /app/nocobase.tar.gz
           RUN wget --no-check-certificate -O /opt/libreoffice24.8.zip https://static-docs.nocobase.com/libreoffice24.8.zip
           RUN wget --no-check-certificate -O /opt/instantclient_19_25.zip https://download.oracle.com/otn_software/linux/instantclient/1925000/instantclient-basic-linux.x64-19.25.0.0.0dbru.zip
           RUN wget --no-check-certificate https://downloads.mysql.com/archives/get/p/23/file/mysql-community-client-core_8.0.39-1debian12_amd64.deb && dpkg -x mysql-community-client-core_8.0.39-1debian12_amd64.deb /tmp/mysql-client && cp /tmp/mysql-client/usr/bin/mysqldump /usr/bin/ && cp /tmp/mysql-client/usr/bin/mysql /usr/bin/ && rm mysql-community-client-core_8.0.39-1debian12_amd64.deb
