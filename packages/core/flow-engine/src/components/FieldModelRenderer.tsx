@@ -10,7 +10,7 @@
 import type { FlowModelRendererProps } from './FlowModelRenderer';
 import { FlowModelRenderer } from './FlowModelRenderer';
 import _ from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 const flowModelRendererPropKeys: (keyof FlowModelRendererProps)[] = [
   'model',
@@ -29,8 +29,10 @@ const flowModelRendererPropKeys: (keyof FlowModelRendererProps)[] = [
 
 export function FieldModelRenderer(props: any) {
   const { model, ...rest } = props;
-  const composingRef = useRef(false);
 
+  // Keep controlled input state in sync during IME composition. Blocking onChange
+  // while composing leaves props.value stale and can make React overwrite the DOM
+  // value, cancelling Korean/CJK composition into separated jamo/characters.
   const handleChange = (e: any) => {
     let val;
     if (e && e.target && typeof e.target.value !== 'undefined') {
@@ -47,24 +49,10 @@ export function FieldModelRenderer(props: any) {
     }
 
     model.setProps({ value: val });
-    if (!composingRef.current) {
-      props.onChange?.(val);
-    }
-  };
-  const handleCompositionStart = () => {
-    composingRef.current = true;
-  };
-
-  const handleCompositionEnd = (e: React.CompositionEvent<HTMLInputElement>, flag = true) => {
-    composingRef.current = false;
-    if (flag) {
-      props.onChange(e);
-    }
+    props.onChange?.(val);
   };
 
   const modelProps = {
-    onCompositionStart: handleCompositionStart,
-    onCompositionEnd: handleCompositionEnd,
     ..._.omit(rest, flowModelRendererPropKeys),
     onChange: handleChange,
   };
