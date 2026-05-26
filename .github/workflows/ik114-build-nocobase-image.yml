@@ -65,40 +65,40 @@ jobs:
           ARG PLUGINS_DIRS
           ENV PLUGINS_DIRS=${PLUGINS_DIRS}
           RUN VERDACCIO_URL="$VERDACCIO_URL" node <<'NODE'
-const fs = require('fs');
-const registry = process.env.VERDACCIO_URL.replace(/\/$/, '');
-const body = {
-  name: 'test',
-  password: 'test',
-  email: 'test@nocobase.com',
-  type: 'user',
-  roles: [],
-  date: new Date().toISOString(),
-};
-fetch(`${registry}/-/user/org.couchdb.user:test`, {
-  method: 'PUT',
-  headers: { 'content-type': 'application/json', accept: 'application/json' },
-  body: JSON.stringify(body),
-})
-  .then(async (response) => {
-    const text = await response.text();
-    if (!response.ok) {
-      console.error(text);
-      process.exit(1);
-    }
-    const data = JSON.parse(text);
-    if (!data.token) {
-      console.error('Verdaccio login response did not include a token');
-      process.exit(1);
-    }
-    const url = new URL(registry);
-    fs.appendFileSync('/root/.npmrc', `//${url.host}/:_authToken=${data.token}\n`);
-  })
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
-NODE
+          const fs = require('fs');
+          const registry = process.env.VERDACCIO_URL.replace(/\/$/, '');
+          const body = {
+            name: 'test',
+            password: 'test',
+            email: 'test@nocobase.com',
+            type: 'user',
+            roles: [],
+            date: new Date().toISOString(),
+          };
+          fetch(`${registry}/-/user/org.couchdb.user:test`, {
+            method: 'PUT',
+            headers: { 'content-type': 'application/json', accept: 'application/json' },
+            body: JSON.stringify(body),
+          })
+            .then(async (response) => {
+              const text = await response.text();
+              if (!response.ok) {
+                console.error(text);
+                process.exit(1);
+              }
+              const data = JSON.parse(text);
+              if (!data.token) {
+                console.error('Verdaccio login response did not include a token');
+                process.exit(1);
+              }
+              const url = new URL(registry);
+              fs.appendFileSync('/root/.npmrc', `//${url.host}/:_authToken=${data.token}\n`);
+            })
+            .catch((error) => {
+              console.error(error);
+              process.exit(1);
+            });
+          NODE
           RUN apt-get update && apt-get install -y jq git
           WORKDIR /tmp
           COPY . /tmp
