@@ -10,7 +10,7 @@ on:
       image_tag:
         description: 'GHCR image tag to publish'
         required: true
-        default: '2.1.0-beta.37-ik114-officialbase.2'
+        default: '2.1.0-beta.37-ik114-officialbase.3'
       platforms:
         description: 'Build platforms'
         required: true
@@ -54,14 +54,24 @@ jobs:
           const files = walk(root);
           const patches = [
             {
-              name: 'v2 FieldModelRenderer',
-              from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),r=l=>{let r;if(r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r}),!n.current){var o;null==(o=e.onChange)||o.call(e,r)}},o={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...A().omit(l,tV),onChange:r};',
-              to: 'function tz(e){let{model:t,...l}=e,r=l=>{let r;r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r});var o;null==(o=e.onChange)||o.call(e,r)},o={...A().omit(l,tV),onChange:r};',
+              name: 'v2 ImeAwareInputFieldModel',
+              from: 'var n=l(74848),r=l(11869),o=l(95725);l(96540);var i=l(44329),a=l(81486);class s extends a.o{render(){return(0,n.jsx)(o.A,{...this.props})}}',
+              to: 'var n=l(74848),r=l(11869),o=l(95725),d=l(96540);var i=l(44329),a=l(81486);function u(e){var t,l;return(null==(t=e.currentTarget)?void 0:t.value)??(null==(l=e.target)?void 0:l.value)}function c(e){let{value:t,defaultValue:l,onChange:r,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e,p=Object.prototype.hasOwnProperty.call(e,"value"),m=(0,d.useRef)(!1),[h,f]=(0,d.useState)(t??l);return(0,d.useEffect)(()=>{p&&!m.current&&f(t)},[p,t]),(0,n.jsx)(o.A,{...c,value:h,onChange:e=>{f(u(e)),null==r||r(e)},onCompositionStart:e=>{m.current=!0,f(u(e)),null==i||i(e)},onCompositionUpdate:e=>{m.current=!0,f(u(e)),null==a||a(e)},onCompositionEnd:e=>{m.current=!1,f(u(e)),null==s||s(e)}})}class s extends a.o{render(){return(0,n.jsx)(c,{...this.props})}}',
             },
             {
-              name: 'legacy FieldModelRenderer',
+              name: 'legacy ImeAwareInputFieldModel',
+              from: 'var n=l(74848),o=l(11869),r=l(95725);l(96540);var i=l(44329),a=l(81486);class s extends a.o{render(){return(0,n.jsx)(r.A,{...this.props})}}',
+              to: 'var n=l(74848),o=l(11869),r=l(95725),d=l(96540);var i=l(44329),a=l(81486);function u(e){var t,l;return(null==(t=e.currentTarget)?void 0:t.value)??(null==(l=e.target)?void 0:l.value)}function c(e){let{value:t,defaultValue:l,onChange:o,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e,p=Object.prototype.hasOwnProperty.call(e,"value"),m=(0,d.useRef)(!1),[h,f]=(0,d.useState)(t??l);return(0,d.useEffect)(()=>{p&&!m.current&&f(t)},[p,t]),(0,n.jsx)(r.A,{...c,value:h,onChange:e=>{f(u(e)),null==o||o(e)},onCompositionStart:e=>{m.current=!0,f(u(e)),null==i||i(e)},onCompositionUpdate:e=>{m.current=!0,f(u(e)),null==a||a(e)},onCompositionEnd:e=>{m.current=!1,f(u(e)),null==s||s(e)}})}class s extends a.o{render(){return(0,n.jsx)(c,{...this.props})}}',
+            },
+            {
+              name: 'v2 FieldModelRenderer FormItem compatible onChange',
+              from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),r=l=>{let r;if(r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r}),!n.current){var o;null==(o=e.onChange)||o.call(e,r)}},o={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...A().omit(l,tV),onChange:r};',
+              to: 'function tz(e){let{model:t,...l}=e,n=l=>{let n,r=l&&l.target&&void 0!==l.target.value;if(n=r?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:n}),e.onChange){var o;null==(o=e.onChange)||o.call(e,r?l:n)}},r={...A().omit(l,tV),onChange:n,onCompositionStart:e.onCompositionStart,onCompositionUpdate:e.onCompositionUpdate,onCompositionEnd:e.onCompositionEnd};',
+            },
+            {
+              name: 'legacy FieldModelRenderer FormItem compatible onChange',
               from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),o=l=>{let o;if(o=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:o}),!n.current){var r;null==(r=e.onChange)||r.call(e,o)}},r={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...k().omit(l,tV),onChange:o};',
-              to: 'function tz(e){let{model:t,...l}=e,o=l=>{let o;o=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:o});var r;null==(r=e.onChange)||r.call(e,o)},r={...k().omit(l,tV),onChange:o};',
+              to: 'function tz(e){let{model:t,...l}=e,n=l=>{let n,o=l&&l.target&&void 0!==l.target.value;if(n=o?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:n}),e.onChange){var r;null==(r=e.onChange)||r.call(e,o?l:n)}},o={...k().omit(l,tV),onChange:n,onCompositionStart:e.onCompositionStart,onCompositionUpdate:e.onCompositionUpdate,onCompositionEnd:e.onCompositionEnd};',
             },
           ];
 
@@ -84,9 +94,10 @@ jobs:
           }
 
           fs.writeFileSync('/app/ik114_patch_info.txt', [
-            'ik114 Korean/CJK IME patch',
+            'ik114 Korean/CJK IME patch v3',
             `base=${process.env.IK114_BASE_IMAGE || 'unknown'}`,
             'source-pr=https://github.com/nocobase/nocobase/pull/9194',
+            'fix=ImeAwareInput wrapper plus Form.Item compatible FieldModelRenderer onChange',
             ...patchedFiles.map((file) => `patched=${file}`),
           ].join('\n') + '\n');
           NODE
@@ -106,14 +117,18 @@ jobs:
 
           const root = '/app/nocobase/node_modules/@nocobase/app/dist/client';
           const joined = walk(root).map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+          for (const marker of [
+            'function c(e){let{value:t,defaultValue:l,onChange:r,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e',
+            'function c(e){let{value:t,defaultValue:l,onChange:o,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e',
+            'onCompositionUpdate:e.onCompositionUpdate,onCompositionEnd:e.onCompositionEnd',
+          ]) {
+            if (!joined.includes(marker)) throw new Error(`patch marker missing: ${marker}`);
+          }
+          if (joined.includes('n.current=!1,l&&e.onChange(t)')) {
+            throw new Error('old compositionEnd form onChange marker still present');
+          }
           if (joined.includes('function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1)')) {
-            throw new Error('old composing guard still present');
-          }
-          if (!joined.includes('function tz(e){let{model:t,...l}=e,r=l=>{let r;r=l&&l.target&&void 0!==l.target.value?')) {
-            throw new Error('patched v2 marker missing');
-          }
-          if (!joined.includes('function tz(e){let{model:t,...l}=e,o=l=>{let o;o=l&&l.target&&void 0!==l.target.value?')) {
-            throw new Error('patched legacy marker missing');
+            throw new Error('old FieldModelRenderer composing guard still present');
           }
           for (const plugin of ['@nocobase/plugin-idp-oauth', '@nocobase/plugin-mcp-server']) {
             const pkg = `/app/nocobase/node_modules/${plugin}/package.json`;
@@ -126,8 +141,7 @@ jobs:
           ]) {
             const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
             console.log(`${pkgPath} ${pkg.version}`);
-          }
-          NODE
+          }          NODE
           DOCKERFILE
           sed -i 's/^          //' Dockerfile.ik114-ime-officialbase
 
