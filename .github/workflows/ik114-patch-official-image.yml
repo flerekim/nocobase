@@ -10,7 +10,7 @@ on:
       image_tag:
         description: 'GHCR image tag to publish'
         required: true
-        default: '2.1.0-beta.37-ik114-officialbase.3'
+        default: '2.1.0-beta.37-ik114-officialbase.4'
       platforms:
         description: 'Build platforms'
         required: true
@@ -64,14 +64,14 @@ jobs:
               to: 'var n=l(74848),o=l(11869),r=l(95725),d=l(96540);var i=l(44329),a=l(81486);function u(e){var t,l;return(null==(t=e.currentTarget)?void 0:t.value)??(null==(l=e.target)?void 0:l.value)}function c(e){let{value:t,defaultValue:l,onChange:o,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e,p=Object.prototype.hasOwnProperty.call(e,"value"),m=(0,d.useRef)(!1),[h,f]=(0,d.useState)(t??l);return(0,d.useEffect)(()=>{p&&!m.current&&f(t)},[p,t]),(0,n.jsx)(r.A,{...c,value:h,onChange:e=>{f(u(e)),null==o||o(e)},onCompositionStart:e=>{m.current=!0,f(u(e)),null==i||i(e)},onCompositionUpdate:e=>{m.current=!0,f(u(e)),null==a||a(e)},onCompositionEnd:e=>{m.current=!1,f(u(e)),null==s||s(e)}})}class s extends a.o{render(){return(0,n.jsx)(c,{...this.props})}}',
             },
             {
-              name: 'v2 FieldModelRenderer FormItem compatible onChange',
-              from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),r=l=>{let r;if(r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r}),!n.current){var o;null==(o=e.onChange)||o.call(e,r)}},o={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...A().omit(l,tV),onChange:r};',
-              to: 'function tz(e){let{model:t,...l}=e,n=l=>{let n,r=l&&l.target&&void 0!==l.target.value;if(n=r?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:n}),e.onChange){var o;null==(o=e.onChange)||o.call(e,r?l:n)}},r={...A().omit(l,tV),onChange:n,onCompositionStart:e.onCompositionStart,onCompositionUpdate:e.onCompositionUpdate,onCompositionEnd:e.onCompositionEnd};',
+              name: 'v2 FieldModelRenderer pending IME protection',
+              from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),r=l=>{let r;if(r=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:r}),!n.current){var o;null==(o=e.onChange)||o.call(e,r)}},o={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...A().omit(l,tV),onChange:r};return(0,f.useEffect)(()=>{t&&t.setProps(o)},[o]),(0,h.jsx)(tL,{model:t,...l})}',
+              to: 'const ik114NoPending=Symbol("NO_PENDING_INPUT_VALUE");function ik114GetChangeValue(e,t=null){return"undefined"==typeof e?t:e&&e.target&&void 0!==e.target.value?e.target.value:e&&e.currentTarget&&void 0!==e.currentTarget.value?e.currentTarget.value:e&&e.target&&void 0!==e.target.checked?e.target.checked:e&&e.currentTarget&&void 0!==e.currentTarget.checked?e.currentTarget.checked:"string"==typeof e||"number"==typeof e||"boolean"==typeof e||"object"==typeof e&&!(e instanceof Event)?e:null}function ik114GetOuterChangeArg(e,t){return e&&e.target&&(void 0!==e.target.value||void 0!==e.target.checked)?e:t}function tz(e){let{model:t,onChange:l,onCompositionStart:n,onCompositionUpdate:r,onCompositionEnd:o,...i}=e,a=(0,f.useRef)(!1),s=(0,f.useRef)(i.value),d=(0,f.useRef)(ik114NoPending),u=(0,f.useRef)(null),c=(0,f.useCallback)(e=>{d.current=e,u.current&&clearTimeout(u.current),u.current=setTimeout(()=>{d.current=ik114NoPending,u.current=null},1e3)},[]),p=(0,f.useCallback)(e=>{let n=ik114GetChangeValue(e);s.current=n,c(n),t.setProps({value:n}),null==l||l(ik114GetOuterChangeArg(e,n))},[c,t,l]),m=(0,f.useCallback)(e=>{a.current=!0,null==n||n(e)},[n]),g=(0,f.useCallback)(e=>{a.current=!0,null==r||r(e)},[r]),v=(0,f.useCallback)(e=>{a.current=!1,null==o||o(e)},[o]),y=(0,f.useMemo)(()=>({...A().omit(i,tV),onChange:p,onCompositionStart:m,onCompositionUpdate:g,onCompositionEnd:v}),[p,m,g,v,i]);return(0,f.useEffect)(()=>{if(!t)return;let e={...y};if(Object.prototype.hasOwnProperty.call(e,"value")){let t=d.current,l=a.current||t!==ik114NoPending&&!Object.is(e.value,t);l&&!Object.is(e.value,s.current)?e.value=s.current:(s.current=e.value,t!==ik114NoPending&&Object.is(e.value,t)&&(d.current=ik114NoPending,u.current&&(clearTimeout(u.current),u.current=null)))}t.setProps(e)},[t,y]),(0,f.useEffect)(()=>()=>{u.current&&clearTimeout(u.current)},[]),(0,h.jsx)(tL,{model:t,...i})}',
             },
             {
-              name: 'legacy FieldModelRenderer FormItem compatible onChange',
-              from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),o=l=>{let o;if(o=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:o}),!n.current){var r;null==(r=e.onChange)||r.call(e,o)}},r={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...k().omit(l,tV),onChange:o};',
-              to: 'function tz(e){let{model:t,...l}=e,n=l=>{let n,o=l&&l.target&&void 0!==l.target.value;if(n=o?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:n}),e.onChange){var r;null==(r=e.onChange)||r.call(e,o?l:n)}},o={...k().omit(l,tV),onChange:n,onCompositionStart:e.onCompositionStart,onCompositionUpdate:e.onCompositionUpdate,onCompositionEnd:e.onCompositionEnd};',
+              name: 'legacy FieldModelRenderer pending IME protection',
+              from: 'function tz(e){let{model:t,...l}=e,n=(0,f.useRef)(!1),o=l=>{let o;if(o=l&&l.target&&void 0!==l.target.value?l.target.value:"string"!=typeof l&&"number"!=typeof l&&"boolean"!=typeof l&&("object"!=typeof l||l instanceof Event)?null:l,t.setProps({value:o}),!n.current){var r;null==(r=e.onChange)||r.call(e,o)}},r={onCompositionStart:()=>{n.current=!0},onCompositionEnd:function(t){let l=!(arguments.length>1)||void 0===arguments[1]||arguments[1];n.current=!1,l&&e.onChange(t)},...k().omit(l,tV),onChange:o};return(0,f.useEffect)(()=>{t&&t.setProps(r)},[r]),(0,m.jsx)(t_,{model:t,...l})}',
+              to: 'const ik114NoPending=Symbol("NO_PENDING_INPUT_VALUE");function ik114GetChangeValue(e,t=null){return"undefined"==typeof e?t:e&&e.target&&void 0!==e.target.value?e.target.value:e&&e.currentTarget&&void 0!==e.currentTarget.value?e.currentTarget.value:e&&e.target&&void 0!==e.target.checked?e.target.checked:e&&e.currentTarget&&void 0!==e.currentTarget.checked?e.currentTarget.checked:"string"==typeof e||"number"==typeof e||"boolean"==typeof e||"object"==typeof e&&!(e instanceof Event)?e:null}function ik114GetOuterChangeArg(e,t){return e&&e.target&&(void 0!==e.target.value||void 0!==e.target.checked)?e:t}function tz(e){let{model:t,onChange:l,onCompositionStart:n,onCompositionUpdate:o,onCompositionEnd:r,...i}=e,a=(0,f.useRef)(!1),s=(0,f.useRef)(i.value),d=(0,f.useRef)(ik114NoPending),u=(0,f.useRef)(null),c=(0,f.useCallback)(e=>{d.current=e,u.current&&clearTimeout(u.current),u.current=setTimeout(()=>{d.current=ik114NoPending,u.current=null},1e3)},[]),p=(0,f.useCallback)(e=>{let n=ik114GetChangeValue(e);s.current=n,c(n),t.setProps({value:n}),null==l||l(ik114GetOuterChangeArg(e,n))},[c,t,l]),g=(0,f.useCallback)(e=>{a.current=!0,null==n||n(e)},[n]),v=(0,f.useCallback)(e=>{a.current=!0,null==o||o(e)},[o]),y=(0,f.useCallback)(e=>{a.current=!1,null==r||r(e)},[r]),b=(0,f.useMemo)(()=>({...k().omit(i,tV),onChange:p,onCompositionStart:g,onCompositionUpdate:v,onCompositionEnd:y}),[p,g,v,y,i]);return(0,f.useEffect)(()=>{if(!t)return;let e={...b};if(Object.prototype.hasOwnProperty.call(e,"value")){let t=d.current,l=a.current||t!==ik114NoPending&&!Object.is(e.value,t);l&&!Object.is(e.value,s.current)?e.value=s.current:(s.current=e.value,t!==ik114NoPending&&Object.is(e.value,t)&&(d.current=ik114NoPending,u.current&&(clearTimeout(u.current),u.current=null)))}t.setProps(e)},[t,b]),(0,f.useEffect)(()=>()=>{u.current&&clearTimeout(u.current)},[]),(0,m.jsx)(t_,{model:t,...i})}',
             },
           ];
 
@@ -94,10 +94,10 @@ jobs:
           }
 
           fs.writeFileSync('/app/ik114_patch_info.txt', [
-            'ik114 Korean/CJK IME patch v3',
+            'ik114 Korean/CJK IME patch v4',
             `base=${process.env.IK114_BASE_IMAGE || 'unknown'}`,
             'source-pr=https://github.com/nocobase/nocobase/pull/9194',
-            'fix=ImeAwareInput wrapper plus Form.Item compatible FieldModelRenderer onChange',
+            'fix=ImeAwareInput wrapper plus FieldModelRenderer pending input value protection',
             ...patchedFiles.map((file) => `patched=${file}`),
           ].join('\n') + '\n');
           NODE
@@ -120,7 +120,9 @@ jobs:
           for (const marker of [
             'function c(e){let{value:t,defaultValue:l,onChange:r,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e',
             'function c(e){let{value:t,defaultValue:l,onChange:o,onCompositionStart:i,onCompositionUpdate:a,onCompositionEnd:s,...c}=e',
-            'onCompositionUpdate:e.onCompositionUpdate,onCompositionEnd:e.onCompositionEnd',
+            'ik114NoPending=Symbol("NO_PENDING_INPUT_VALUE")',
+            'ik114GetOuterChangeArg',
+            'Object.prototype.hasOwnProperty.call(e,"value")',
           ]) {
             if (!joined.includes(marker)) throw new Error(`patch marker missing: ${marker}`);
           }
@@ -141,8 +143,7 @@ jobs:
           ]) {
             const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
             console.log(`${pkgPath} ${pkg.version}`);
-          }
-          NODE
+          }          NODE
           DOCKERFILE
           sed -i 's/^          //' Dockerfile.ik114-ime-officialbase
 
