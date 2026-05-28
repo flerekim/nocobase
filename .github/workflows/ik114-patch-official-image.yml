@@ -141,7 +141,8 @@ jobs:
           ]) {
             const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
             console.log(`${pkgPath} ${pkg.version}`);
-          }          NODE
+          }
+          NODE
           DOCKERFILE
           sed -i 's/^          //' Dockerfile.ik114-ime-officialbase
 
